@@ -260,18 +260,54 @@
             matchedPairs = 0;
             selectedCard = null;
             
-            // 5つのペアを生成
-            for (let i = 0; i < 5; i++) {
-                let num1 = Math.floor(Math.random() * (targetNumber - 1)) + 1;
-                let num2 = targetNumber - num1;
-                gameNumbers.push(num1, num2);
+            // 可能なすべてのペアを生成
+            let possiblePairs = [];
+            for (let i = 1; i < targetNumber; i++) {
+                let j = targetNumber - i;
+                if (i < j) { // 重複を避けるため、i < j の条件を追加
+                    possiblePairs.push([i, j]);
+                }
             }
             
-            // 配列をシャッフル
+            // 可能なペアが5つ未満の場合は、重複を許可
+            if (possiblePairs.length < 5) {
+                possiblePairs = [];
+                for (let i = 1; i < targetNumber; i++) {
+                    let j = targetNumber - i;
+                    if (i !== j) { // 同じ数字のペアは除外
+                        possiblePairs.push([i, j]);
+                    }
+                }
+            }
+            
+            // ペアをシャッフル
+            for (let i = possiblePairs.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [possiblePairs[i], possiblePairs[j]] = [possiblePairs[j], possiblePairs[i]];
+            }
+            
+            // 最初の5つのペアを選択（または利用可能なすべてのペア）
+            let selectedPairs = possiblePairs.slice(0, Math.min(5, possiblePairs.length));
+            
+            // 不足分は重複を許可して補完
+            while (selectedPairs.length < 5 && possiblePairs.length > 0) {
+                let randomIndex = Math.floor(Math.random() * possiblePairs.length);
+                selectedPairs.push(possiblePairs[randomIndex]);
+            }
+            
+            // ペアを展開して配列に追加
+            selectedPairs.forEach(pair => {
+                gameNumbers.push(pair[0], pair[1]);
+            });
+            
+            // 最終的な配列をシャッフル
             for (let i = gameNumbers.length - 1; i > 0; i--) {
                 let j = Math.floor(Math.random() * (i + 1));
                 [gameNumbers[i], gameNumbers[j]] = [gameNumbers[j], gameNumbers[i]];
             }
+            
+            // 実際のペア数を更新
+            totalPairs = selectedPairs.length;
         }
 
         function showGameScreen() {
